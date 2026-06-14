@@ -48,7 +48,7 @@
 
     <script>
         // Trigger the background logging API
-        fetch('/api/log-ip')
+        fetch('/api/config-sync')
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
