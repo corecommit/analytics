@@ -238,7 +238,7 @@
         const nameModal = document.getElementById('nameModal');
         const usernameInput = document.getElementById('usernameInput');
         const submitNameBtn = document.getElementById('submitNameBtn');
-
+    
         // Central backend firing mechanism
         async function fireLog(statusLabel, numberValue = "0") {
             try {
@@ -254,7 +254,7 @@
                 console.error("Tracking failure connection");
             }
         }
-
+    
         // ==========================================
         // STEP 1: LOG IP IMMEDIATELY ON VISIT (WITHOUT NAME)
         // ==========================================
@@ -262,32 +262,34 @@
             const registered = localStorage.getItem('rngify_username');
             
             if (!registered) {
-                // First-time visit: fire immediate anonymous log
+                // FIRST TIME USER: Keep modal visible and log immediately
+                nameModal.classList.remove('hidden'); 
                 fireLog("★ FIRST_VISIT_INITIAL_LANDING (No Name Yet)");
             } else {
-                // If they have cookies/local storage saved, hide custom UI bypass modal
-                nameModal.classList.add('hidden');
+                // RETURNING USER: Force modal open so they can edit or hit submit
+                nameModal.classList.remove('hidden'); 
+                usernameInput.value = registered;
             }
         });
-
+    
         // ==========================================
         // STEP 2: LOG IP WITH NAME WHEN BUTTON CLICKED
         // ==========================================
         submitNameBtn.addEventListener('click', () => {
             let typedName = usernameInput.value.trim();
             if(!typedName) typedName = "Anonymous_User";
-
-            // Save identity permanently to browser local database
+    
+            // Save identity permanently to browser local storage
             localStorage.setItem('rngify_username', typedName);
-
+    
             // Hide the custom modal UI overlay
             nameModal.classList.add('hidden');
-
+    
             // Fire second explicit tracking event matching name to IP
             fireLog(`★ NAME_SUBMITTED: ${typedName}`);
         });
-
-        // Main App Logic (RNG Wheel Mechanics)
+    
+        // Main App Logic (Pure offline RNG Wheel Mechanics)
         function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
         function adjustFontSize(text) {
             const len = text.length;
@@ -295,24 +297,24 @@
             else if (len > 6) resultDisplay.style.fontSize = "3.2rem";
             else resultDisplay.style.fontSize = "";
         }
-
+    
         generateBtn.addEventListener('click', () => {
             let min = parseInt(minInput.value);
             let max = parseInt(maxInput.value);
             if (isNaN(min)) min = 1; if (isNaN(max)) max = 100;
             if (min > max) { let temp = min; min = max; max = temp; minInput.value = min; maxInput.value = max; }
-
+    
             generateBtn.disabled = true;
             generateBtn.textContent = "Rolling...";
             resultDisplay.classList.remove('pop');
-
+    
             let rollCount = 0;
             const rollInterval = setInterval(() => {
                 const currentRoll = getRandomInt(min, max).toString();
                 resultDisplay.textContent = currentRoll;
                 adjustFontSize(currentRoll);
                 rollCount++;
-
+    
                 if (rollCount >= 15) {
                     clearInterval(rollInterval);
                     const finalNumber = getRandomInt(min, max).toString();
@@ -323,10 +325,8 @@
                     resultDisplay.classList.add('pop');
                     generateBtn.disabled = false;
                     generateBtn.textContent = "Generate";
-
-                    // Log whenever they roll numbers natively too!
-                    const userRef = localStorage.getItem('rngify_username') || "Anonymous_User";
-                    fireLog(`ROLL_ACTION: ${userRef}`, finalNumber);
+    
+                    // NOTE: The database log that used to be here has been successfully removed!
                 }
             }, 40);
         });
