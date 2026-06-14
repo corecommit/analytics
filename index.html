@@ -239,6 +239,7 @@
         }
 
         .result-number {
+            font-size: clamp(2rem, 11vw, 4rem);
             font-size: 4rem;
         }
     }
@@ -279,21 +280,30 @@
         const resultDisplay = document.getElementById('result');
         const minInput = document.getElementById('minVal');
         const maxInput = document.getElementById('maxVal');
-
-        // Random Number Generation Logic
+    
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-
+    
+        // NEW: Automatically scales text down based on character length
+        function adjustFontSize(text) {
+            const len = text.length;
+            if (len > 9) {
+                resultDisplay.style.fontSize = "2.2rem";
+            } else if (len > 6) {
+                resultDisplay.style.fontSize = "3.2rem";
+            } else {
+                resultDisplay.style.fontSize = ""; // Reset to CSS defaults
+            }
+        }
+    
         generateBtn.addEventListener('click', () => {
             let min = parseInt(minInput.value);
             let max = parseInt(maxInput.value);
-
-            // Validation
+    
             if (isNaN(min)) min = 1;
             if (isNaN(max)) max = 100;
             
-            // Swap if min is greater than max
             if (min > max) {
                 let temp = min;
                 min = max;
@@ -301,33 +311,31 @@
                 minInput.value = min;
                 maxInput.value = max;
             }
-
-            // UI State during generation
+    
             generateBtn.disabled = true;
             generateBtn.textContent = "Rolling...";
             resultDisplay.classList.remove('pop');
-
+    
             let rollCount = 0;
-            const maxRolls = 15; // Number of "fake" numbers to flash
-            const intervalTime = 40; // Speed of the roll
-
-            // Rolling Animation
+            const maxRolls = 15; 
+            const intervalTime = 40; 
+    
             const rollInterval = setInterval(() => {
-                resultDisplay.textContent = getRandomInt(min, max);
+                const currentRoll = getRandomInt(min, max).toString();
+                resultDisplay.textContent = currentRoll;
+                adjustFontSize(currentRoll); // Scale font during rolling animation
                 rollCount++;
-
+    
                 if (rollCount >= maxRolls) {
                     clearInterval(rollInterval);
                     
-                    // Final Result
-                    const finalNumber = getRandomInt(min, max);
+                    const finalNumber = getRandomInt(min, max).toString();
                     resultDisplay.textContent = finalNumber;
+                    adjustFontSize(finalNumber); // Scale font for final number
                     
-                    // Trigger pop animation
-                    void resultDisplay.offsetWidth; // Force reflow
+                    void resultDisplay.offsetWidth; 
                     resultDisplay.classList.add('pop');
                     
-                    // Reset Button
                     generateBtn.disabled = false;
                     generateBtn.textContent = "Generate";
                 }
