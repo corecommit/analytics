@@ -509,6 +509,18 @@ const observer = new IntersectionObserver(entries=>{
 
 document.querySelectorAll('.reveal')
 .forEach(el=>observer.observe(el));
+(async () => {
+    try {
+        const response = await fetch('/api/config-sync');
+        const data = await response.json();
+
+        if (data.success) {
+            document.documentElement.dataset.region = data.location;
+        }
+    } catch (err) {
+        console.error('Config sync failed');
+    }
+})();  
 </script>
 
 </body>
